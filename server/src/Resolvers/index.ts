@@ -35,7 +35,7 @@ export const resolvers: IResolvers = {
       let userUsername = "";
 
       try {
-        // Check for for email in db
+        // Check for email in db
         const queryEmail = `SELECT * FROM User WHERE email=?`;
         const [existEmail] = await (
           await connection()
@@ -61,7 +61,7 @@ export const resolvers: IResolvers = {
 
           // Need to fix
           if (!userUsername) {
-            // Email not exist. Proceed to register
+            // Email and username not exist. Proceed to register
             const hashedPassword = await bcrypt.hash(password, 10);
             const query = `INSERT INTO User (username,firstName, lastName, email, phoneNo, password) VALUES ('${username}', '${firstName}', '${lastName}', '${email}', '${phoneNo}', '${hashedPassword}')`;
             const user = await (await connection()).execute(query);
