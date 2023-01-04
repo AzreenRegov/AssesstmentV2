@@ -35,43 +35,34 @@ export const resolvers: IResolvers = {
       let userUsername = "";
 
       try {
-        // Check for for email in db
+        //check for username in db
+        const queryUsername = `SELECT * FROM User WHERE username=?`;
+        const [existUsername] = await (
+          await connection()
+        ).query<IUser[]>(queryUsername, username);
+
+        if (existUsername.length > 0) {
+          return { message: "This username is already exist" };
+        }
+
+        //Check for email in db
         const queryEmail = `SELECT * FROM User WHERE email=?`;
         const [existEmail] = await (
           await connection()
         ).query<IUser[]>(queryEmail, email);
 
-        userEmail = existEmail[0].email;
-        userUsername = existEmail[0].username;
-
-        return { message: "This email already exist" };
-      } catch {
-        if (!userEmail) {
-          // //Check for username in db
-          // const queryUsername = `SELECT * FROM User WHERE username=?`;
-          // const [existUsername] = await (
-          //   await connection()
-          // ).query<IUser[]>(queryUsername, username);
-
-          // userUsername = existUsername[0].username;
-
-          // if (username == userUsername) {
-          //   return { message: "This username already exist" };
-          // }
-
-          // Need to fix
-          if (!userUsername) {
-            // Email not exist. Proceed to register
-            const hashedPassword = await bcrypt.hash(password, 10);
-            const query = `INSERT INTO User (username,firstName, lastName, email, phoneNo, password) VALUES ('${username}', '${firstName}', '${lastName}', '${email}', '${phoneNo}', '${hashedPassword}')`;
-            const user = await (await connection()).execute(query);
-
-            return { message: "Successfully Registered!" };
-          } else {
-            return { message: "This username already exist" };
-          }
+        if (existEmail.length > 0) {
+          return { message: "This email is already exist" };
         }
+      } catch (e) {
+        console.log(e);
       }
+
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const query = `INSERT INTO User (username,firstName, lastName, email, phoneNo, password) VALUES ('${username}', '${firstName}', '${lastName}', '${email}', '${phoneNo}', '${hashedPassword}')`;
+      const user = await (await connection()).execute(query);
+
+      return { message: "Successfully Registered!" };
     },
 
     login: async (_, { username, password }) => {
